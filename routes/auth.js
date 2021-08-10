@@ -1,6 +1,7 @@
+const express = require("express");
 const jwt = require("jsonwebtoken");
 const router = express.Router();
-const User = require("..models/user");
+const User = require("../models/user");
 const { SECRET_KEY } = require("../config");
 const ExpressError = require("../ExpressError");
 /** POST /login - login: {username, password} => {token}
@@ -17,7 +18,7 @@ router.post("/login", async (req, res, next) => {
             User.updateLoginTimestamp(username);
             return res.json({ token });
         } else {
-            throw new ExpressError("Wrong username or password", 404);
+            throw new ExpressError("Wrong username or password", 400);
         }
     } catch (e) {
         return next(e);
@@ -41,3 +42,5 @@ router.post("/register", async (req, res, next) => {
         return next(e);
     }
 });
+
+module.exports = router;
