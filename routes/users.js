@@ -1,9 +1,7 @@
 const express = require("express");
 const router = express.Router();
-const ExpressError = require("../ExpressError");
-const jwt = require("jsonwebtoken");
-const { SECRET_KEY } = require("../config");
 const User = require("../models/user");
+const { ensureLoggedIn, ensureCorrectUser } = require("../middleware/auth");
 
 /** GET / - get list of users.
  *
@@ -26,8 +24,9 @@ router.get("/", async (req, res, next) => {
  *
  **/
 
-router.get("/:username", async (req, res, next) => {
+router.get("/:username", ensureCorrectUser, async (req, res, next) => {
     try {
+        const { username } = req.params;
         let user = await User.get(username);
         return res.json({ user: user });
     } catch (e) {
@@ -44,6 +43,15 @@ router.get("/:username", async (req, res, next) => {
  *                 from_user: {username, first_name, last_name, phone}}, ...]}
  *
  **/
+router.get(":/username/to", ensureCorrectUser, async (req, res, next) => {
+    try {
+        const { username } = req.params;
+        let messages = await User.messagesTo(username);
+        return res.json({ messages });
+    } catch (e) {
+        return next(e);
+    }
+});
 
 /** GET /:username/from - get messages from user
  *
@@ -54,3 +62,13 @@ router.get("/:username", async (req, res, next) => {
  *                 to_user: {username, first_name, last_name, phone}}, ...]}
  *
  **/
+
+router.get(":/username/from", ensureCorrectUser, async (req, res, next) => {
+    try {
+        const { username } = req.params;
+        let messages = await User.messagesFrom(username);
+        return res.json({ messages });
+    } catch (e) {
+        return next(e);
+    }
+});
